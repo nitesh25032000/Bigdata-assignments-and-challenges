@@ -1,0 +1,113 @@
+1.create table agent_performance
+(
+SL_No int,
+Date date,
+Agent_Name string,
+Total_Chats int,
+Average_Response_Time timestamp,
+Average_Resolution_Time timestamp,
+Average_Rating float,
+Total_Feedback int)
+row format serde 'org.apache.hadoop.hive.serde2.OpenCSVSerde';
+
+create table agent_login
+(
+SL_No int,
+Agent string,
+Date string,
+Login_Time string,
+Logout_Time string,
+Duration string)
+row format delimited
+fields terminated by ',';
+
+2. dumping the data into schema from hdfs by creating a table
+
+load data inpath '/tmp/mini_project/AgentPerformance.csv' into table agent_performance;
+load data inpath '/tmp/mini_project/AgentLogingReport.csv' into table agent_login;
+
+3.select agent_name from agent_performance;-- selecting the agent name 
+
+4.select avg(average_rating)as avg_ratings,agent_name from agent_performance group by agent_name;--finding out the average agent ratings
+
+5.select agent,count(date) from agent_login group by agent;--total no of working days for each agent
+
+6.select total_chats,agent_name from agent_performance;--total query that each agent have received
+
+7.select sum(total_feedback),agent_name from agent_performance group by agent_name;--total feedback each agent have received
+
+8.select avg(average_rating),agent_name from agent_performance group by agent_name having avg(average_rating) between 3.5 and 4;
+-- avg rating of agents between 3.5 and 4
+
+9.select average_rating,agent_name from agent_performance where average_rating<3.5 group by agent_name,average_rating;
+
+-- agent having rating less than 3.5
+
+10.select average_rating,agent_name from agent_performance where average_rating > 4.5 group by agent_name,average_rating;
+-- agent having rating greater than 4.5
+
+11.select total_feedback,average_rating,agent_name from agent_performance group by total_feedback,average_rating,agent_name having total_feedback >0 and avg(average_rating)>4.5; 
+--feedback agents having rating greater than 4.5
+
+12.select avg(minute(average_response_time)),agent_name  from agent_performance group by agent_name;
+--weekly average response time for each agent
+
+13. select avg(minute(average_resolution_time)),agent_name  from agent_performance group by agent_name;
+--weekly average resolution time for each agent
+
+14.select sum(total_feedback),agent_name from agent_performance group by agent_name having sum(total_feedback)>0;
+--finding the no of chats on which they have received the feedback;
+
+15.select sum(hour(duration)),agent from agent_login  group by agent;
+-- total contribution hour for each and every agent weekly basis
+
+16.select ap.agent_name,ap.date from agent_performance ap inner join agent_login ag on ap.agent_name=ag.agent;
+--inner join
+select ap.agent_name,ap.total_chats,ap.total_feedback,al.duration from agent_performance ap left join agent_login al on ap.agent_name=al.agent;
+--left join
+select al.logout_time,al.login_time,ap.average_rating from agent_login al  right  join agent_performance ap  on al.agent=ap.agent_name limit 10;
+--right join
+
+INSERT OVERWRITE LOCAL DIRECTORY '/home/cloudera/tmp/hive_mini_project/agent_performance_innerjoin.csv' 
+ROW FORMAT serde 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+select ap.agent_name,ap.date from agent_performance ap inner join agent_login ag on ap.agent_name=ag.agent;
+-- exporting the output of inner join to local machine
+
+17.  
+create table agent_login_part
+(
+SL_No int,
+Date date,
+Login_Time timestamp,
+Logout_Time timestamp,
+Duration timestamp)
+partitioned by (agent string)
+row format delimited 
+fields terminated by ','; --create partition table
+
+insert overwrite table agent_login_part
+partition(agent)
+select sl_no,date,login_time,logout_time,duration,agent from agent_login; --inserting data into partition table
+
+
+create table agent_login_part_buck
+(
+SL_No int,
+Date date,
+Login_Time timestamp,
+Logout_Time timestamp,
+Duration timestamp)
+partitioned by (agent string)
+clustered by (duration) into 4 buckets
+row format delimited 
+fields terminated by ',';  --creating a bucketing on top of partition
+
+
+insert into agent_login_part_buck
+partition(agent)
+select sl_no,date,login_time,logout_time,duration,agent from agent_login; --inserting data for bucket table after partitioning
+
+
+
+
+
