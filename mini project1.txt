@@ -1,4 +1,4 @@
-1.create table agent_performance
+1.screate table agent_performance
 (
 SL_No int,
 Date date,
@@ -77,10 +77,10 @@ select ap.agent_name,ap.date from agent_performance ap inner join agent_login ag
 create table agent_login_part
 (
 SL_No int,
-Date date,
-Login_Time timestamp,
-Logout_Time timestamp,
-Duration timestamp)
+Date string,
+Login_Time string,
+Logout_Time string,
+Duration string)
 partitioned by (agent string)
 row format delimited 
 fields terminated by ','; --create partition table
@@ -93,12 +93,12 @@ select sl_no,date,login_time,logout_time,duration,agent from agent_login; --inse
 create table agent_login_part_buck
 (
 SL_No int,
-Date date,
-Login_Time timestamp,
-Logout_Time timestamp,
-Duration timestamp)
+Date string,
+Login_Time string,
+Logout_Time string,
+Duration string)
 partitioned by (agent string)
-clustered by (duration) into 4 buckets
+clustered by (duration) into 1 buckets
 row format delimited 
 fields terminated by ',';  --creating a bucketing on top of partition
 
