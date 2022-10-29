@@ -1,0 +1,125 @@
+create table parking_violation
+(
+summons_number int,
+plate_id string,
+registeration_state string,
+plate_type string,
+issue_date string,
+violation_code int,
+vehicle_body_type string,
+vehicle_make string,
+issuing_agency string,
+street_code1 int,
+street_code2 int,
+street_code3 int,
+vehicle_expiration_date int,
+violation_location string,
+violation_precinct int,
+issuer_precinct int,
+issuer_code int,
+issuer_command string,
+issuer_squad string,
+violation_time string,
+time_first_observed string,
+violation_country string,
+violation_in_front_of_or_opposite string,
+house_number string,
+street_name string,
+intersecting_street string,
+date_first_observed int,
+law_section int,
+sub_division string,
+violation_legal_code string,
+days_parking_in_effect string,
+from_hours_in_effect string,
+to_hours_in_effect string,
+vehicle_color string,
+unregistered_vehicle string,
+vehicle_year string,
+meter_number string,
+feet_from_curb int,
+violation_post_code string,
+violation_description string,
+no_standing_or_stopping_violation string,
+hydrant_violation string,
+double_parking_violation string)
+row format delimited
+fields terminated by '\;'
+stored as textfile;
+
+
+
+create table parking_violation_orc
+(
+summons_number int,
+plate_id string,
+registeration_state string,
+plate_type string,
+issue_date string,
+violation_code int,
+vehicle_body_type string,
+vehicle_make string,
+issuing_agency string,
+street_code1 int,
+street_code2 int,
+street_code3 int,
+vehicle_expiration_date int,
+violation_location string,
+violation_precinct int,
+issuer_precinct int,
+issuer_code int,
+issuer_command string,
+issuer_squad string,
+violation_time string,
+time_first_observed string,
+violation_country string,
+violation_in_front_of_or_opposite string,
+house_number string,
+street_name string,
+intersecting_street string,
+date_first_observed int,
+law_section int,
+sub_division string,
+violation_legal_code string,
+days_parking_in_effect string,
+from_hours_in_effect string,
+to_hours_in_effect string,
+vehicle_color string,
+unregistered_vehicle string,
+vehicle_year string,
+meter_number string,
+feet_from_curb int,
+violation_post_code string,
+violation_description string,
+no_standing_or_stopping_violation string,
+hydrant_violation string,
+double_parking_violation string)
+stored as orc;
+
+
+PART-1 examin the data
+1.select count(distinct summons_number) from parking_violation_orc; --to find the total number of tickets for the year
+2.select count(distinct registeration_state) from parking_violation_buck; --to find the cars which came from unique states
+3.select count(summons_number) from parking_violation where street_code1 is null or street_code2 is null or street_code3 is null;
+
+
+part-2 aggregation task
+1.select count(*)as ticket_frequency,violation_code from parking_violation_orc order by violation_code desc limit 5;
+2.select count(*)as ticket_frequency,vehicle_body_type,vehicle_make from parking_violation_orc group by vehicle_body_type,vehicle_make order by ticket_frequency limit 5;
+3.
+a)select violation_precinct,count(*)as ticket_frequency from parking_violation_orc group by violation_precinct order by ticket_frequency desc limit 5;
+b)select count(*)as ticket_frequency, issuer_precinct from parking_violation_orc group by issuer_precinct order by ticket_frequency desc limit 5;
+4.select violation_code,count(*) as frequency from parking_violation_orc where Issuer_Precinct in (18,19,14) group by Violation_Code order by Frequency desc limit 3;
+7.select Violation_Time, count(*) Vio_count from parking_violation_orc where Violation_Code in (21, 36, 38) group by Violation_Time order by Vio_count desc limit 3; 
+8.
+a)
+select Violation_Code , Issuer_Precinct, season
+case 
+when issue_date between '03/01/2017' and '05/31/2017' then 'spring' 
+when issue_date between '06/01/2017' and '08/31/2017'  then 'summer' 
+when issue_date between '09/01/2017' and '11/30/2017' then 'autumn' 
+when issue_date in ('01/01/2017','02/01/2017','12/01/2017') then 'winter' 
+end  as season from parking_violation_orc
+limit 20;
+
+b)select Violation_Code, count(*) as Frequency from tickets_seasonality_tbl where Issuer_Precinct in (19, 14, 1) and season = 'winter' group by Violation_Code order by Frequency desc limit 3;
