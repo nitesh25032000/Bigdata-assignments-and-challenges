@@ -1557,3 +1557,23 @@ SELECT `name`
 FROM `students`
 WHERE `marks` > 75
 ORDER BY SUBSTR(`name`, -3), ID ASC;
+
+
+-- q.104
+SELECT NAME FROM EMPLOYEE ORDER BY NAME;
+
+-- q.105
+SELECT *
+FROM Emp 
+WHERE Salary > 2000
+  AND Hire_Date >= DATE_SUB(CURRENT_DATE, INTERVAL 10 MONTH)
+ORDER BY emp_no ASC;
+
+-- q.106
+select case
+when A+B <= C or A+C <= B or B+C <= A then "Not A Triangle"
+when A=B and B=C then "Equilateral"
+when A=B or A=C or B=C then "Isosceles"
+else "Scalene"
+end as triangles_type
+from TRIANGLES;
